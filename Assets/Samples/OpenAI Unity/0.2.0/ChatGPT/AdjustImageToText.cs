@@ -22,7 +22,7 @@ public class AdjustImageToText : MonoBehaviour
         textComponent = textRectTransform.GetComponent<TextMeshProUGUI>();
 
         // Define the initial text here
-        string initialText = "What is geometry?";
+        string initialText = "What is quatum computing?";
 
         // Set the initial text
         textComponent.text = initialText;

@@ -359,6 +359,7 @@
 "Assets/Samples/OpenAI Unity/0.2.0/ChatGPT/AdjustImageToText.cs"
 "Assets/Samples/OpenAI Unity/0.2.0/ChatGPT/ChatGPT.cs"
 "Assets/Samples/OpenAI Unity/0.2.0/ChatGPT/DropdownHandler.cs"
+"Assets/Samples/OpenAI Unity/0.2.0/ChatGPT/SettingsMenu.cs"
 "Assets/Samples/OpenAI Unity/0.2.0/DallE/DallE.cs"
 "Assets/Samples/OpenAI Unity/0.2.0/Stream Response/StreamResponse.cs"
 "Assets/Samples/OpenAI Unity/0.2.0/Whisper/SaveWav.cs"
