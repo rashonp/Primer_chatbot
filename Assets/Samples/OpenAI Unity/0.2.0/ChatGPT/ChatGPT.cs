@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
+using System.Collections;
+using UnityEngine.Networking;
+using System;
 
 namespace OpenAI
 {
@@ -16,6 +20,17 @@ namespace OpenAI
         
         [SerializeField] private RectTransform sent;
         [SerializeField] private RectTransform received;
+
+
+
+        [SerializeField] private RectTransform sampleTextRectTransform;
+        [SerializeField] private Button sampleQuestionButton;
+        private TextMeshProUGUI sampleQuestionText;
+        public Vector2 padding;
+        private RectTransform rectTransform;
+
+        
+
 
         private float height;
         private OpenAIApi openai = new OpenAIApi();
@@ -43,7 +58,7 @@ namespace OpenAI
             explanationDictionary.Add(3, "Answer as if you were talking to a grad student. Your response should be understandable for someone who has completed college.");
             explanationDictionary.Add(4, "Answer as if you were a leading expert in this field talking to colleague.");
 
-            detailsDictionary.Add(0, "Your response should be very short and to the point. At most, it should be a few sentences.");
+            detailsDictionary.Add(0, "Your response should be very short and to the point. At most, it should two short sentences.");
             detailsDictionary.Add(1, "Your response should be moderately detailed. It should be 3 to 5 sentences long.");
             detailsDictionary.Add(2, "Your response should be comprehensive. It should be over atleast 2 paragraphs long.");
 
@@ -51,11 +66,64 @@ namespace OpenAI
             responseDictionary.Add(1, "Provide two different responses to the same question. Cleary separate and number the two responses.");
             responseDictionary.Add(2, "Provide three different responses to the same question. Cleary separate and number the three responses.");
 
-            // explanationSlider.onValueChanged.AddListener(OnSliderValueChanged);
-            // detailsSlider.onValueChanged.AddListener(OnSliderValueChanged);
-            // responseSlider.onValueChanged.AddListener(OnSliderValueChanged);
+
+            rectTransform = sampleQuestionButton.GetComponent<RectTransform>();
+            sampleQuestionText = sampleTextRectTransform.GetComponent<TextMeshProUGUI>();
+            // Set the initial text
+            sampleQuestionText.text = "What is astro physics?";
+            // Adjust the size of the image based on initial text
+            AdjustSize();
+            sampleQuestionButton.onClick.AddListener(UpdateInput);
         }
 
+        private void AdjustSize()
+        {
+            if (sampleTextRectTransform != null)
+            {
+                // Use the preferred values to accommodate for any dynamic resizing of text
+                rectTransform.sizeDelta = new Vector2(sampleQuestionText.preferredWidth + padding.x, sampleQuestionText.preferredHeight + padding.y);
+            }
+        }
+
+        private async void UpdateInput()
+        {
+            inputField.text = sampleQuestionText.text;
+        }
+
+        private async void GetNewSampleQuestion() 
+        {
+            var newMessage = new ChatMessage()
+            {
+                Role = "user",
+                Content = "Create a follow up question for this message chain. Do not output any other information, just the question. Limit question to 6 words or less."
+            };
+
+            messages.Add(newMessage);
+
+            var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
+            {
+                // Model = "gpt-3.5-turbo-0613",
+                Model = "gpt-4",
+                Messages = messages
+            });
+
+            if (completionResponse.Choices != null && completionResponse.Choices.Count > 0)
+            {
+                var message = completionResponse.Choices[0].Message;
+                message.Content = message.Content.Trim();
+
+                messages.RemoveAt(messages.Count - 1);
+
+                sampleQuestionText.text = message.Content;
+                // Adjust the size of the image based on initial text
+                AdjustSize();
+            }
+            else
+            {
+                Debug.LogWarning("No text was generated from this prompt.");
+            }
+
+        }
         private void AppendMessage(ChatMessage message)
         {
             scroll.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);
@@ -103,7 +171,8 @@ namespace OpenAI
             // Complete the instruction
             var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
             {
-                Model = "gpt-3.5-turbo-0613",
+                // Model = "gpt-3.5-turbo-0613",
+                Model = "gpt-4",
                 Messages = messages
             });
 
@@ -114,6 +183,8 @@ namespace OpenAI
                 
                 messages.Add(message);
                 AppendMessage(message);
+                GetNewSampleQuestion();
+                Debug.Log(message.Content);
             }
             else
             {
