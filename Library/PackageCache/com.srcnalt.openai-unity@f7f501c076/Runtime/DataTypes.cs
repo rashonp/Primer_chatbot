@@ -157,10 +157,22 @@ namespace OpenAI
         public string Logprobs { get; set; }
     }
 
+    public class ContentItem
+    {
+        public string Type { get; set; }
+        public string? Text { get; set; }
+        public ImageUrl? image_url { get; set; }
+    }
+
+    public class ImageUrl
+    {
+        public string Url { get; set; }
+    }
+
     public struct ChatMessage
     {
         public string Role { get; set; }
-        public string Content { get; set; }
+        public object Content { get; set; }
         public string? Name { get; set; }
         public List<ToolCall> ToolCalls { get; set; }
         public string? ToolCallId { get; set; }

@@ -34,8 +34,6 @@ namespace OpenAI
         private Vector3 rotationAxis = new Vector3(0, 1, 1).normalized; // Initial rotation axis
         private float rotationSpeed = 50.0f; // Initial rotation speed in degrees per second
 
-        private string prompt = @"You are an intelligent agent, your purpose is to provide structured input for function calling. Given a function name and parameters";
-
         private List<Tool> tools = new List<Tool>();
         void Start()
         {
@@ -200,7 +198,7 @@ namespace OpenAI
                     if (response_message2.Choices != null && response_message2.Choices.Count > 0)
                     {
                         var message2 = response_message2.Choices[0].Message;
-                        shapeChangerText.text = message2.Content;
+                        shapeChangerText.text = message2.Content as string;
                     }
                     else
                     {
