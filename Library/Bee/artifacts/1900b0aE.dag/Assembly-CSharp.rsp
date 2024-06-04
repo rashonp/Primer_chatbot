@@ -325,6 +325,8 @@
 -r:"C:/Users/rasho/Documents/Docs/research/NLI_research_project/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll"
 -r:"C:/Users/rasho/Documents/Docs/research/NLI_research_project/Library/PackageCache/com.unity.testtools.codecoverage@1.0.1/lib/ReportGenerator/ReportGeneratorMerged.dll"
 -r:"C:/Users/rasho/Documents/Docs/research/NLI_research_project/Library/PackageCache/com.unity.visualscripting@1.7.8/Runtime/VisualScripting.Flow/Dependencies/NCalc/Unity.VisualScripting.Antlr3.Runtime.dll"
+-r:"Library/Bee/artifacts/1900b0aE.dag/NativeCamera.Editor.ref.dll"
+-r:"Library/Bee/artifacts/1900b0aE.dag/NativeCamera.Runtime.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aE.dag/OpenAI.Editor.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aE.dag/OpenAI.Runtime.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aE.dag/Unity.EditorCoroutines.Editor.ref.dll"

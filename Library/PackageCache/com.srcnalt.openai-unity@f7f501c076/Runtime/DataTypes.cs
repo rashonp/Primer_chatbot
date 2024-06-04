@@ -162,11 +162,17 @@ namespace OpenAI
         public string Type { get; set; }
         public string? Text { get; set; }
         public ImageUrl? image_url { get; set; }
+        public ImageBase64? image_base64 { get; set; }
     }
 
     public class ImageUrl
     {
         public string Url { get; set; }
+    }
+
+    public class ImageBase64
+    {
+        public string Data { get; set; }
     }
 
     public struct ChatMessage
