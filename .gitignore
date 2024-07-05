@@ -2,7 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
-/[Ll]ibrary/
+[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
@@ -62,3 +62,4 @@ crashlytics-build.properties
 .DS_Store
 Assets/.DS_Store
 Assets/Scenes/.DS_Store
+/Library
