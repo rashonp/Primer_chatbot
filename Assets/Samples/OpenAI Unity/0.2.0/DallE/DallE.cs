@@ -1,7 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Networking;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Collections;
+using TMPro;
+
+[System.Serializable]
+public class ResponseData
+{
+    public string response;
+}
 
 namespace OpenAI
 {
@@ -9,53 +16,91 @@ namespace OpenAI
     {
         [SerializeField] private InputField inputField;
         [SerializeField] private Button button;
-        [SerializeField] private Image image;
-        [SerializeField] private GameObject loadingLabel;
+        [SerializeField] private ScrollRect scroll;
+        [SerializeField] private RectTransform sent;
+        [SerializeField] private RectTransform received;
 
-        private OpenAIApi openai = new OpenAIApi();
+        private float height;
+        private List<ChatMessage> messages = new List<ChatMessage>();
+        private string prompt = "Act as a random stranger in a chat room and reply to the questions. Don't break character. Don't ever mention that you are an AI model.";
+        
+        private SocketConnection socketConnection;
 
         private void Start()
         {
-            button.onClick.AddListener(SendImageRequest);
+            button.onClick.AddListener(SendReply);
+            socketConnection = GetComponent<SocketConnection>();
+            socketConnection.OnMessageReceived += HandleResponse;
         }
 
-        private async void SendImageRequest()
+        private IEnumerator AppendMessageCoroutine(ChatMessage message)
         {
-            image.sprite = null;
+
+            // Append new message to chat
+            scroll.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);
+
+            var item = Instantiate(message.Role == "user" ? sent : received, scroll.content);
+            item.GetChild(0).GetChild(0).GetComponent<Text>().text = message.Content as string;
+            item.anchoredPosition = new Vector2(0, -height);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(item);
+            height += item.sizeDelta.y;
+            scroll.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            scroll.verticalNormalizedPosition = 0;
+            yield return null;
+        }
+
+        private void AppendMessage(ChatMessage message)
+        {
+            // Start the coroutine to handle the UI updates on the main thread
+            StartCoroutine(AppendMessageCoroutine(message));
+        }
+
+        private void SendReply()
+        {
+            var newMessage = new ChatMessage()
+            {
+                Role = "user",
+                Content = inputField.text
+            };
+
+            AppendMessage(newMessage);
+
+            if (messages.Count == 0) newMessage.Content = prompt + "\n" + inputField.text;
+
+            messages.Add(newMessage);
+
             button.enabled = false;
+            inputField.text = "";
             inputField.enabled = false;
-            loadingLabel.SetActive(true);
 
-            var response = await openai.CreateImage(new CreateImageRequest
+            socketConnection.SendMessageToServer(newMessage.Content as string);
+        }
+
+        public void HandleResponse(string response)
+        {
+            // Parse the JSON string to an object
+            ResponseData responseData = JsonUtility.FromJson<ResponseData>(response);
+
+            // Extract the response text
+            string responseText = responseData.response;
+
+            // Print the response text
+            var message = new ChatMessage()
             {
-                Prompt = inputField.text,
-                Size = ImageSize.Size256
+                Role = "assistant",
+                Content = responseText
+            };
+
+            messages.Add(message);
+
+            // Ensure the message is appended on the main thread
+            MainThreadDispatcher.Enqueue(() => AppendMessage(message));
+
+            MainThreadDispatcher.Enqueue(() =>
+            {
+                button.enabled = true;
+                inputField.enabled = true;
             });
-
-            if (response.Data != null && response.Data.Count > 0)
-            {
-                using(var request = new UnityWebRequest(response.Data[0].Url))
-                {
-                    request.downloadHandler = new DownloadHandlerBuffer();
-                    request.SetRequestHeader("Access-Control-Allow-Origin", "*");
-                    request.SendWebRequest();
-
-                    while (!request.isDone) await Task.Yield();
-
-                    Texture2D texture = new Texture2D(2, 2);
-                    texture.LoadImage(request.downloadHandler.data);
-                    var sprite = Sprite.Create(texture, new Rect(0, 0, 256, 256), Vector2.zero, 1f);
-                    image.sprite = sprite;
-                }
-            }
-            else
-            {
-                Debug.LogWarning("No image was created from this prompt.");
-            }
-
-            button.enabled = true;
-            inputField.enabled = true;
-            loadingLabel.SetActive(false);
         }
     }
 }
